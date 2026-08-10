@@ -1,0 +1,8 @@
+#Environment related files
+api-env/
+
+#Learning related files
+learndocs/
+
+#byte code
+__pycache__/
