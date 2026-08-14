@@ -27,19 +27,6 @@ while True:
         print("Connection to database if faild with error: ", error)
         time.sleep(2)
 
-# Funcitons
-def find_index_post(id):
-    for i, p in enumerate(my_posts):
-        if p['id'] == id:
-            return i
-    return None
-
-def find_post(id):
-    for post in my_posts:
-        if post['id'] == id:
-            return post
-
-    return None
 
 # API
 
@@ -48,12 +35,10 @@ def home():
     return {"message": "Welcome to the social media"}
 
 @app.get("/posts/{id}")
-def get_post(id: int):  # , response: Response):
+def get_post(id: int):
     cur.execute("""SELECT * FROM posts WHERE id = %s""", (str(id),))
     post = cur.fetchone()
     if not post:
-        # response.status_code = status.HTTP_404_NOT_FOUND
-        # return {"Message": f"Post with the id: {id} was not found"}
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"Post with the id: {id} was not found")
 
