@@ -2,15 +2,17 @@ from fastapi import FastAPI, Response, status, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.params import Body
 from pydantic import BaseModel
-from typing import Optional
-import random
 import psycopg
 from psycopg.rows import dict_row
 import time
 from dotenv import load_dotenv
+from database import sessionDep
+from models import create_table
 import os
 
 load_dotenv()
+
+create_table()
 
 app = FastAPI()
 
@@ -33,6 +35,10 @@ while True:
 @app.get("/")
 def home():
     return {"message": "Welcome to the social media"}
+
+@app.get("/sqlalchemy")
+def test_post(session = sessionDep):
+    return {"status": "success"}
 
 @app.get("/posts/{id}")
 def get_post(id: int):
