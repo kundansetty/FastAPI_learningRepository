@@ -9,3 +9,6 @@ learndocs/
 
 #byte code
 __pycache__/
+
+#worksapce
+*.code-workspace
