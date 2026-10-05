@@ -1,9 +1,7 @@
 from fastapi import FastAPI
 from dotenv import load_dotenv
-import database, models
+import database, models, config
 from routers import post, user, auth
-
-load_dotenv()
 
 models.create_table(database.engine)
 

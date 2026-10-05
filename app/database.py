@@ -7,7 +7,7 @@ import os
 
 load_dotenv()
 
-# 'postgresql://<username>:<password>@<ip-address/hostname>/<database_name>'
+# 'postgresql://<username>:<password>@<ip-address/hostname>:<database_portnumber>/<database_name>'
 
 SQLALCHEMY_DATABASE_URL = f'postgresql+psycopg://{os.environ["DB_USER"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}/{os.environ["DB_NAME"]}'
 
