@@ -1,15 +1,12 @@
 from sqlmodel import create_engine, Session, select
 import models
+from config import settings
 from typing import Annotated
 from fastapi import Depends
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
 
 # 'postgresql://<username>:<password>@<ip-address/hostname>:<database_portnumber>/<database_name>'
 
-SQLALCHEMY_DATABASE_URL = f'postgresql+psycopg://{os.environ["DB_USER"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}/{os.environ["DB_NAME"]}'
+SQLALCHEMY_DATABASE_URL = f'postgresql+psycopg://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}'
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 

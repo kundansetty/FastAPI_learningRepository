@@ -1,12 +1,12 @@
-import jwt, os
+import jwt
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from fastapi import Depends, HTTPException, status 
 from fastapi.security import OAuth2PasswordBearer
 from typing import Annotated
 from datetime import datetime, timedelta, UTC
 import schemas, database, models
-from dotenv import load_dotenv
 from sqlmodel import select
+from config import settings
 
 #SECRET_KEY
 #Algorithm
@@ -14,19 +14,18 @@ from sqlmodel import select
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
 
-load_dotenv()
 
 def create_access_token(data: dict):
     to_encode = data.copy()
 
-    exipires = datetime.now(UTC) + timedelta(minutes=int(os.environ['ACCESS_TOKEN_EXPIRE_MINUTES']))
+    exipires = datetime.now(UTC) + timedelta(minutes=settings.access_token_expire_minutes)
     to_encode.update({"exp": exipires})
-    encoded_jwt = jwt.encode(to_encode, os.environ['SECRET_KEY'], os.environ['ALGORITHM'])
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, settings.algorithm)
     return encoded_jwt
 
 def verfiy_access_token(token: str, credentials_exception):
     try: 
-        payload = jwt.decode(token, os.environ['SECRET_KEY'], algorithms=[os.environ['ALGORITHM']])
+        payload = jwt.decode(token, settings.secret_key, algorithms=settings.algorithm)
         id = payload.get("user_id")
         if id is None:
             raise credentials_exception
