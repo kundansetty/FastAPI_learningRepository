@@ -14,7 +14,7 @@ class Posts(SQLModel, table = True):
                                             nullable=False))
     user_id: int =  Field(nullable=False,foreign_key="users.id",ondelete="CASCADE")
 
-    user: Users = Relationship(back_populates="posts")
+    user: "Users" = Relationship(back_populates="posts")
 
 class Users(SQLModel, table=True):
     id: int | None = Field(default = None, primary_key=True)
@@ -25,6 +25,10 @@ class Users(SQLModel, table=True):
                                                              nullable=False))
 
     posts: list["Posts"] = Relationship(back_populates="user")
-     
+
+class Votes(SQLModel, table=True):
+    user_id: int = Field(nullable=False, primary_key=True, foreign_key="users.id", ondelete="CASCADE")
+    post_id: int = Field(nullable=False, primary_key=True, foreign_key="posts.id", ondelete="CASCADE")
+
 def create_table(eg: Engine) -> None:
     SQLModel.metadata.create_all(eg)

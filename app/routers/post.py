@@ -1,4 +1,4 @@
-from sqlmodel import select, or_, col
+from sqlmodel import select, or_, col, func
 from fastapi import status, HTTPException, Response, APIRouter, Depends
 from typing import List, Annotated, Optional
 
@@ -9,31 +9,64 @@ router = APIRouter(
     tags=['Posts'] #Logically group the routers in swagger UI
 )
 
-@router.get("/{id}", response_model=schemas.PostResponse)
+@router.get("/{id}", response_model=schemas.PostVoteResponse)
 def get_post(id: int, 
              session: database.sessionDep, 
              current_user: Annotated[schemas.UserResponse, Depends(oauth2.get_current_user)]): #get the current logged in user
     # cur.execute("""SELECT * FROM posts WHERE id = %s""", (str(id),))
     # post = cur.fetchone()
     # print(current_user)
-    post = session.get(models.Posts, id)
+
+    # post = session.get(models.Posts, id)
+
+    statement = select(models.Posts, func.count(models.Votes.user_id).label("votes")).join(
+        models.Votes,models.Posts.id == models.Votes.post_id, isouter=True).group_by(
+            models.Posts.id).where(models.Posts.id == id).where(or_(models.Posts.published == True, models.Posts.user_id == current_user.id))
+
+    post = session.exec(statement).all()
+    
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"Post with the id: {id} was not found")
 
-    return post
+    results = list(map(lambda x : x._mapping, post))[0]
 
-@router.get("/", response_model=List[schemas.PostResponse])
+    return results
+
+@router.get("/", response_model=List[schemas.PostVoteResponse])
 def get_posts(session: database.sessionDep, current_user: Annotated[int, Depends(oauth2.get_current_user)],
               limit: int = 2, skip: int = 0, search: Optional[str] = ""):
+
     # cur.execute("""SELECT * FROM posts""")
     # posts = cur.fetchall()
+
+    '''
+
+    This "statement" was used when no joins were introduced to me and no voting system was enabled
+
     statement = select(models.Posts).where(
         or_(models.Posts.published == True, models.Posts.user_id == current_user.id)).where(
             col(models.Posts.title).contains(search)).order_by(
             models.Posts.published, models.Posts.created_at).limit(limit).offset(skip)
+    '''
+
+    statement = select(models.Posts, func.count(models.Votes.user_id).label("votes")).join(
+        models.Votes,models.Posts.id == models.Votes.post_id, isouter=True).group_by(
+            models.Posts.id).where(
+        or_(models.Posts.published == True, models.Posts.user_id == current_user.id)).where(
+            col(models.Posts.title).contains(search)).order_by(
+            models.Posts.published, models.Posts.created_at).limit(limit).offset(skip)
     posts = session.exec(statement).all()
-    return posts
+
+    '''
+        When select statement has two arguments it returns a Row object instead of dict. So, when we return a row object without
+        converting it into list, it raise errors.
+    '''
+    results = list(map(lambda x : x._mapping, posts))
+
+    print(results)
+
+    return results
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
 def create_post(payload: schemas.PostCreate, 
