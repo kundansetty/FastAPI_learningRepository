@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import database, models, config
 from routers import post, user, auth, vote
 
-# Commenting because alembic is gonna take care of this engine creation.
+# Commenting because of alembic
 # models.create_table(database.engine)
 
 app = FastAPI()
