@@ -20,6 +20,7 @@ class Users(SQLModel, table=True):
     id: int | None = Field(default = None, primary_key=True)
     email: str = Field(nullable=False, unique=True)
     password: str = Field(nullable=False)
+    phone_number: str
     created_at: Optional[datetime] = Field(sa_column=Column(TIMESTAMP(timezone=True),
                                                              server_default=text("CURRENT_TIMESTAMP"),
                                                              nullable=False))
